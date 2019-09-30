@@ -41,7 +41,7 @@ export default class PacMan extends Vue {
   }
   animate() {
     this.currentFrame++
-    if(!(this.currentFrame % this.frames)){
+    if (!(this.currentFrame % this.frames)) {
       this.times = this.currentFrame / this.frames
       this.drawSplash()
       this.drawLogo()
@@ -62,13 +62,13 @@ export default class PacMan extends Vue {
     const t = Math.abs(5 - this.times % 10)
     this.$context.fillStyle = '#FFE600'
     this.$context.beginPath()
-    this.$context.arc(x, y, width/2, t*.04*Math.PI, (2-t*.04)*Math.PI, false)
+    this.$context.arc(x, y, width / 2, t * .04 * Math.PI, (2 - t * .04) * Math.PI, false)
     this.$context.lineTo(x, y)
     this.$context.closePath()
     this.$context.fill()
     this.$context.fillStyle = '#000'
     this.$context.beginPath()
-    this.$context.arc(x+5, y-27, 7, 0, 2*Math.PI, false)
+    this.$context.arc(x + 5, y - 27, 7, 0, 2 * Math.PI, false)
     this.$context.closePath()
     this.$context.fill()
   }
