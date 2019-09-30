@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import PacMan from './components/PacMan.vue';
+import { Component, Vue } from 'vue-property-decorator'
+import PacMan from './components/PacMan.vue'
 
 @Component({
   components: {
