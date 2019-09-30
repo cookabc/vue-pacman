@@ -1,5 +1,5 @@
 const getCanvasElementById = (id: string): HTMLCanvasElement => {
-  const canvas = document.getElementById(id)
+  const canvas = document.querySelector('#canvas')
   if (!(canvas instanceof HTMLCanvasElement)) {
     throw new Error(`The element of id "${id}" is not a HTMLCanvasElement.
         Make sure a <canvas id="${id}""> element is present in the document.`)
