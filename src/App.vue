@@ -33,9 +33,9 @@ export default class PacMan extends Vue {
   SCORE: number = 0
   LEVEL: number = 0
   LIFE: number = 5
-  COLOR: string[] = ['#F00','#F93','#0CF','#F9C']
-  COS: number[] = [1,0,-1,0]
-	SIN: number[] = [0,1,0,-1]
+  COLOR: string[] = ['#F00', '#F93', '#0CF', '#F9C']
+  COS: number[] = [1, 0, -1, 0]
+  SIN: number[] = [0, 1, 0, -1]
   mounted() {
     this.initCanvas()
     this.animate()
@@ -61,7 +61,7 @@ export default class PacMan extends Vue {
       this.drawScoreLevel()
       this.drawLife()
       this.drawPlayer()
-      for(let i = 0; i < 4; i++) {
+      for (let i = 0; i < 4; i++) {
         this.drawNPC(i)
       }
     }
@@ -128,7 +128,7 @@ export default class PacMan extends Vue {
     const y = 510
     const width = 30
     const height = 30
-    for(let i = 0; i < this.LIFE - 1; i++) {
+    for (let i = 0; i < this.LIFE - 1; i++) {
       const shiftX = x + 40 * i
       this.$context.fillStyle = '#FFE600'
       this.$context.beginPath()
@@ -156,7 +156,7 @@ export default class PacMan extends Vue {
     const frames = 10
     this.$context.fillStyle = '#FFE600'
     this.$context.beginPath()
-    if(this.npcTimes % 2) {
+    if (this.npcTimes % 2) {
       this.$context.arc(x, y, width / 2, (0.5 * orientation + 0.20) * Math.PI, (0.5 *  orientation - 0.20) * Math.PI, false)
     } else {
       this.$context.arc(x, y, width / 2, (0.5 * orientation + 0.01) * Math.PI, (0.5 *  orientation - 0.01) * Math.PI, false)
@@ -182,17 +182,17 @@ export default class PacMan extends Vue {
     this.$context.fillStyle = color
     this.$context.beginPath()
     this.$context.arc(x, y, width / 2, 0, Math.PI, true)
-    switch(this.npcTimes % 2) {
+    switch (this.npcTimes % 2) {
       case 0:
         this.$context.lineTo(x - width * .5, y + height * .4)
-        this.$context.quadraticCurveTo(x - width * .4, y + height *.5, x - width * .2, y + height * .3)
-        this.$context.quadraticCurveTo(x, y + height *.5,x + width *.2, y + height *.3)
-        this.$context.quadraticCurveTo(x + width * .4, y + height * .5, x + width *.5, y + height * .4)
+        this.$context.quadraticCurveTo(x - width * .4, y + height * .5, x - width * .2, y + height * .3)
+        this.$context.quadraticCurveTo(x, y + height * .5, x + width * .2, y + height * .3)
+        this.$context.quadraticCurveTo(x + width * .4, y + height * .5, x + width * .5, y + height * .4)
         break
       case 1:
         this.$context.lineTo(x - width * .5, y + height * .3)
-        this.$context.quadraticCurveTo(x - width * .25, y + height *.5, x, y + height * .3)
-        this.$context.quadraticCurveTo(x - width * .25, y + height *.5, x + width * .5, y + height * .3)
+        this.$context.quadraticCurveTo(x - width * .25, y + height * .5, x, y + height * .3)
+        this.$context.quadraticCurveTo(x - width * .25, y + height * .5, x + width * .5, y + height * .3)
         break
     }
     this.$context.fill()
