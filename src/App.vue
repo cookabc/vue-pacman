@@ -1,6 +1,7 @@
 <template>
   <div class="pac-man">
     <canvas id="canvas" class="canvas"></canvas>
+    <button class="btn" @click="stopAnimate">Stop</button>
   </div>
 </template>
 
@@ -38,6 +39,10 @@ export default class PacMan extends Vue {
   SIN: number[] = [0, 1, 0, -1]
   mounted() {
     this.initCanvas()
+    this.drawCanvas()
+    this.drawMap()
+    this.drawScoreLevel()
+    this.drawLife()
     this.animate()
   }
   initCanvas() {
@@ -46,31 +51,33 @@ export default class PacMan extends Vue {
     this.$canvas.height = this.height
     this.$context = Utils.getCanvasRenderingContext2D(this.$canvas)
   }
+  drawCanvas() {
+    this.$context.clearRect(0, 0, this.width, this.height)
+    this.$context.fillStyle = '#000000'
+    this.$context.fillRect(0, 0, this.width, this.height)
+    this.$context.beginPath()
+    this.$context.rect(610, 580, 10, 10)
+    this.$context.stroke()
+  }
+  stopAnimate() {
+    if (this.handler) { cancelAnimationFrame(this.handler) }
+  }
   animate() {
     this.currentFrame++
     // Splash
     // if (!(this.currentFrame % this.frames)) {
-    //   this.drawSplash()
     //   this.drawLogo()
     //   this.drawName()
     // }
     // Main stage
     if (!(this.currentFrame % this.npcFrames)) {
       this.npcTimes = this.currentFrame / this.npcFrames
-      this.drawSplash()
-      this.drawScoreLevel()
-      this.drawLife()
-      this.drawPlayer()
-      for (let i = 0; i < 4; i++) {
-        this.drawNPC(i)
-      }
+      // this.drawPlayer()
+      // for (let i = 0; i < 4; i++) {
+      //   this.drawNPC(i)
+      // }
     }
     this.handler = requestAnimationFrame(this.animate)
-  }
-  drawSplash() {
-    this.$context.clearRect(0, 0, this.width, this.height)
-    this.$context.fillStyle = '#000000'
-    this.$context.fillRect(0, 0, this.width, this.height)
   }
   drawLogo() {
     const x = this.width / 2
@@ -99,6 +106,89 @@ export default class PacMan extends Vue {
     this.$context.fillStyle = '#FFF'
     this.$context.fillText('Pac Man', x, y)
   }
+  drawMap() {
+    const x = 60
+    const y = 10
+    const data = Constant.MAP_DATA[0].map
+    const xLength = data[0].length
+    const yLength = data.length
+    const size = 20
+    const cache = true
+    const get = (px: number, py: number) => {
+      if (data[py] && typeof data[py][px] !== 'undefined') {
+        return data[py][px]
+      }
+      return -1
+    }
+    const coord2position = (cx: number, cy: number) => {
+      return {
+        x: x + cx * size + size / 2,
+        y: y + cy * size + size / 2
+      }
+    }
+    this.$context.lineWidth = 2
+    for (let j = 0; j < yLength; j++) {
+      for (let i = 0; i < xLength; i++) {
+        const value = get(i, j)
+        if (value) {
+          const code = [0, 0, 0, 0]
+          if (get(i + 1, j) && !(get(i + 1, j - 1) && get(i + 1, j + 1) && get(i, j - 1) && get(i, j + 1))) {
+            code[0] = 1
+          }
+          if (get(i, j + 1) && !(get(i - 1, j + 1) && get(i + 1, j + 1) && get(i - 1, j) && get(i + 1, j))) {
+            code[1] = 1
+          }
+          if (get(i - 1, j) && !(get(i - 1, j - 1) && get(i - 1, j + 1) && get(i, j - 1) && get(i, j + 1))) {
+            code[2] = 1
+          }
+          if (get(i, j - 1) && !(get(i - 1, j - 1) && get(i + 1, j - 1) && get(i - 1, j) && get(i + 1, j))) {
+            code[3] = 1
+          }
+          if (code.includes(1)) {
+            this.$context.strokeStyle = value === 2 ? '#FFF' : Constant.MAP_DATA[0].wall_color
+            const pos = coord2position(i, j)
+            switch (code.join('')) {
+              case '1100':
+                this.$context.beginPath()
+                this.$context.arc(pos.x + size / 2, pos.y + size / 2, size / 2, Math.PI, 1.5 * Math.PI, false)
+                this.$context.stroke()
+                this.$context.closePath()
+                break
+              case '0110':
+                this.$context.beginPath()
+                this.$context.arc(pos.x - size / 2, pos.y + size / 2, size / 2, 1.5 * Math.PI, 2 * Math.PI, false)
+                this.$context.stroke()
+                this.$context.closePath()
+                break
+              case '0011':
+                this.$context.beginPath()
+                this.$context.arc(pos.x - size / 2, pos.y - size / 2, size / 2, 0, .5 * Math.PI, false)
+                this.$context.stroke()
+                this.$context.closePath()
+                break
+              case '1001':
+                this.$context.beginPath()
+                this.$context.arc(pos.x + size / 2, pos.y - size / 2, size / 2, .5 * Math.PI, 1 * Math.PI, false)
+                this.$context.stroke()
+                this.$context.closePath()
+                break
+              default:
+                const dist = size / 2
+                code.forEach((v, index) => {
+                  if (v) {
+                    this.$context.beginPath()
+                    this.$context.moveTo(pos.x, pos.y)
+                    this.$context.lineTo(pos.x - this.COS[index] * dist, pos.y - this.SIN[index] * dist)
+                    this.$context.stroke()
+                    this.$context.closePath()
+                  }
+                })
+            }
+          }
+        }
+      }
+    }
+  }
   drawScoreLevel() {
     const x = 690
     const y = 80
@@ -125,7 +215,7 @@ export default class PacMan extends Vue {
   }
   drawLife() {
     const x = 705
-    const y = 510
+    const y = 560
     const width = 30
     const height = 30
     for (let i = 0; i < this.LIFE - 1; i++) {
@@ -223,11 +313,25 @@ export default class PacMan extends Vue {
   justify-content: center;
   align-items: flex-start;
 }
+.btn {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+  z-index: 10;
+  background: #14517a;
+  font-size: 30px;
+  color: #fff;
+}
 </style>
 <style lang="scss">
 body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
+}
+canvas{
+  display:block;
+  background: #000;
 }
 </style>
