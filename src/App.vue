@@ -8,13 +8,64 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import Constant from './helpers/Constant'
+import { GlobalEnv } from './helpers/Interfaces'
 import Utils from './helpers/Utils'
 import Stage from './components/Stage'
-import Map from './components/Map'
-import Item from './components/Item'
+import {
+  Item,
+  LogoItem,
+  NameItem,
+  ScoreLevelItem,
+  StatusItem,
+  LifeItem,
+  PlayerItem,
+  NpcItem
+} from './components/Item'
+import {
+  Map,
+  WallMap,
+  BeanMap
+} from './components/Map'
 
 const WIDTH = 960
 const HEIGHT = 640
+const MAP_DATA = {
+  map: [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  ],
+  wall_color: '#09f',
+  goods: ['1,3', '26,3', '1,23', '26,23']
+}
 
 @Component
 export default class PacMan extends Vue {
@@ -22,15 +73,27 @@ export default class PacMan extends Vue {
   $context!: CanvasRenderingContext2D
   width: number = Constant.CANVAS_WIDTH
   height: number = Constant.CANVAS_HEIGHT
-  times: number = 0
-  frames: number = 3
+  logoTimes: number = 0
+  logoFrames: number = 3
+  beanTimes: number = 0
+  beanFrames: number = 8
   npcTimes: number = 0
   npcFrames: number = 10
   currentFrame: number = 0
   handler: number = 0
   stage!: Stage
-  maps: Map[] = []
   items: Item[] = []
+  maps: Map[] = []
+  logoItem!: LogoItem
+  globalObj: GlobalEnv = {
+    SCORE: 0,
+    LEVEL: 0,
+    LIFE: 5,
+    COLOR: ['#F00', '#F93', '#0CF', '#F9C'],
+    COS: [1, 0, -1, 0],
+    SIN: [0, 1, 0, -1],
+    CONFIG: MAP_DATA
+  }
   SCORE: number = 0
   LEVEL: number = 0
   LIFE: number = 5
@@ -39,10 +102,8 @@ export default class PacMan extends Vue {
   SIN: number[] = [0, 1, 0, -1]
   mounted() {
     this.initCanvas()
-    this.drawCanvas()
-    this.drawMap()
-    this.drawScoreLevel()
-    this.drawLife()
+    this.initItems()
+    this.initMaps()
     this.animate()
   }
   initCanvas() {
@@ -51,32 +112,104 @@ export default class PacMan extends Vue {
     this.$canvas.height = this.height
     this.$context = Utils.getCanvasRenderingContext2D(this.$canvas)
   }
+  initItems() {
+    this.items.push(new LogoItem({
+      x: this.width / 2,
+			y: this.height * .45,
+			width: 100,
+			height: 100,
+      frames: 3
+    }))
+    this.items.push(new NameItem({
+      x: this.width / 2,
+			y: this.height * .6
+    }))
+    this.items.push(new ScoreLevelItem({
+      x: 690,
+			y: 80
+    }))
+    this.items.push(new StatusItem({
+      x: 690,
+      y: 285,
+      frames: 25
+    }))
+    this.items.push(new LifeItem({
+      x: 705,
+      y: 510,
+      width: 30,
+      height: 30
+    }))
+    for (let i = 0; i < 4; i++) {
+      this.items.push(new NpcItem({
+        x: 250 + i * 50,
+        y: 250,
+        width: 30,
+        height: 30,
+        orientation: 3,
+        color: this.globalObj.COLOR[i],
+        // location: map,
+        coord: { x: 12 + i, y: 14 },
+        vector: { x: 12 + i, y: 14 },
+        type: 2,
+        frames: 10,
+        speed: 1,
+        timeout: Math.floor(Math.random() * 120)
+      }))
+    }
+    this.items.push(new PlayerItem({
+      x: 200,
+      y: 200,
+      width: 30,
+      height: 30,
+      type: 1,
+      // location: map,
+      coord: { x: 13.5, y: 23 },
+      orientation: 2,
+      speed: 2,
+      frames: 10
+    }))
+  }
+  initMaps() {
+    this.maps.push(new WallMap({
+      x: 60,
+      y: 10,
+      data: this.globalObj.CONFIG.map,
+      yLength: this.globalObj.CONFIG.map.length,
+      xLength: this.globalObj.CONFIG.map[0].length,
+      cache: true
+    }))
+    this.maps.push(new BeanMap({
+      x: 60,
+      y: 10,
+      data: this.globalObj.CONFIG.map,
+      yLength: this.globalObj.CONFIG.map.length,
+      xLength: this.globalObj.CONFIG.map[0].length,
+      frames: 8
+    }))
+  }
   drawCanvas() {
     this.$context.clearRect(0, 0, this.width, this.height)
     this.$context.fillStyle = '#000000'
     this.$context.fillRect(0, 0, this.width, this.height)
-    this.$context.beginPath()
-    this.$context.rect(610, 580, 10, 10)
-    this.$context.stroke()
   }
   stopAnimate() {
     if (this.handler) { cancelAnimationFrame(this.handler) }
   }
   animate() {
+    this.drawCanvas()
     this.currentFrame++
-    // Splash
-    // if (!(this.currentFrame % this.frames)) {
-    //   this.drawLogo()
-    //   this.drawName()
-    // }
-    // Main stage
-    if (!(this.currentFrame % this.npcFrames)) {
-      this.npcTimes = this.currentFrame / this.npcFrames
-      // this.drawPlayer()
-      // for (let i = 0; i < 4; i++) {
-      //   this.drawNPC(i)
-      // }
-    }
+    this.items.forEach((item: Item) => {
+      if (!(this.currentFrame % item.frames)) {
+        item.times = this.currentFrame / item.frames
+      }
+      item.draw(this.$context, this.globalObj)
+    })
+    this.maps.forEach((map: Map) => {
+      if (!(this.currentFrame % map.frames)) {
+        map.times = this.currentFrame / map.frames
+      }
+      map.draw(this.$context, this.globalObj)
+    })
     this.handler = requestAnimationFrame(this.animate)
   }
   drawLogo() {
@@ -84,7 +217,12 @@ export default class PacMan extends Vue {
     const y = this.height * .45
     const width = 100
     const height = 100
-    const t = Math.abs(5 - this.times % 10)
+    const frames = 3
+    let times = 0
+    if (!(this.currentFrame % frames)) {
+      times = this.currentFrame / frames
+    }
+    const t = Math.abs(5 - times % 10)
     this.$context.fillStyle = '#FFE600'
     this.$context.beginPath()
     this.$context.arc(x, y, width / 2, t * .04 * Math.PI, (2 - t * .04) * Math.PI, false)
@@ -100,6 +238,8 @@ export default class PacMan extends Vue {
   drawName() {
     const x = this.width / 2
     const y = this.height * .6
+    const frames = 1
+    const times = 0
     this.$context.font = 'bold 42px Helvetica'
     this.$context.textAlign = 'center'
     this.$context.textBaseline = 'middle'
@@ -109,7 +249,7 @@ export default class PacMan extends Vue {
   drawMap() {
     const x = 60
     const y = 10
-    const data = Constant.MAP_DATA[0].map
+    const data = MAP_DATA.map
     const xLength = data[0].length
     const yLength = data.length
     const size = 20
@@ -189,9 +329,50 @@ export default class PacMan extends Vue {
       }
     }
   }
+  drawBean() {
+    const x = 60
+    const y = 10
+    const data = MAP_DATA.map
+    const xLength = data[0].length
+    const yLength = data.length
+    const beans: string[] = MAP_DATA.goods
+    const size = 20
+    const times = 0
+    const frames = 8
+    const get = (px: number, py: number) => {
+      if (data[py] && typeof data[py][px] !== 'undefined') {
+        return data[py][px]
+      }
+      return -1
+    }
+    const coord2position = (cx: number, cy: number) => {
+      return {
+        x: x + cx * size + size / 2,
+        y: y + cy * size + size / 2
+      }
+    }
+    for (let j = 0; j < yLength; j++) {
+      for (let i = 0; i < xLength; i++) {
+        if (!get(i, j)) {
+          const pos = coord2position(i, j)
+          this.$context.fillStyle = '#F5F5DC'
+          if (beans.includes(`${i},${j}`)) {
+            this.$context.beginPath()
+            this.$context.arc(pos.x, pos.y, 3 + this.beanTimes % 2, 0, 2 * Math.PI, true)
+            this.$context.fill()
+            this.$context.closePath()
+          } else {
+            this.$context.fillRect(pos.x - 2, pos.y - 2, 4, 4)
+          }
+        }
+      }
+    }
+  }
   drawScoreLevel() {
     const x = 690
     const y = 80
+    const frames = 1
+    const times = 0
     this.$context.font = 'bold 26px Helvetica'
     this.$context.textAlign = 'left'
     this.$context.textBaseline = 'bottom'
@@ -215,9 +396,11 @@ export default class PacMan extends Vue {
   }
   drawLife() {
     const x = 705
-    const y = 560
+    const y = 510
     const width = 30
     const height = 30
+    const frames = 1
+    const times = 0
     for (let i = 0; i < this.LIFE - 1; i++) {
       const shiftX = x + 40 * i
       this.$context.fillStyle = '#FFE600'
@@ -244,6 +427,7 @@ export default class PacMan extends Vue {
     const orientation = 0
     const speed = 2
     const frames = 10
+    const times = 0
     this.$context.fillStyle = '#FFE600'
     this.$context.beginPath()
     if (this.npcTimes % 2) {
@@ -268,6 +452,7 @@ export default class PacMan extends Vue {
     const orientation = 0
     const speed = 1
     const frames = 10
+    const times = 0
     // Draw Body
     this.$context.fillStyle = color
     this.$context.beginPath()
