@@ -1,4 +1,6 @@
 export interface GlobalEnv {
+  WIDTH: number,
+  HEIGHT: number,
   SCORE: number,
   LEVEL: number,
   LIFE: number,

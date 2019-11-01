@@ -1,4 +1,4 @@
-const getCanvasElementById = (id: string): HTMLCanvasElement => {
+export const getCanvasElementById = (id: string): HTMLCanvasElement => {
   const canvas = document.querySelector('#canvas')
   if (!(canvas instanceof HTMLCanvasElement)) {
     throw new Error(`The element of id "${id}" is not a HTMLCanvasElement.
@@ -7,15 +7,10 @@ const getCanvasElementById = (id: string): HTMLCanvasElement => {
   return canvas
 }
 
-const getCanvasRenderingContext2D = (canvas: HTMLCanvasElement): CanvasRenderingContext2D => {
+export const getCanvasRenderingContext2D = (canvas: HTMLCanvasElement): CanvasRenderingContext2D => {
   const context = canvas.getContext('2d')
   if (context === null) {
     throw new Error('This browser does not support 2-dimensional canvas rendering contexts.')
   }
   return context
-}
-
-export default {
-  getCanvasElementById,
-  getCanvasRenderingContext2D,
 }
