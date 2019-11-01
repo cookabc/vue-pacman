@@ -1,4 +1,5 @@
-import { GlobalEnv } from '../helpers/Interfaces'
+import { GlobalEnv, Coord, Vector } from '../helpers/Interfaces'
+import { BaseMap } from './Map'
 
 export class Item {
   _params: {}
@@ -14,10 +15,10 @@ export class Item {
   orientation: number = 0			                                        // 当前定位方向,0表示右,1表示下,2表示左,3表示上
   speed: number = 0				                                            // 移动速度
   // 地图相关
-  location: any = null       			                                    // 定位地图,Map对象
-  coord: any = null		       		                                      // 如果对象与地图绑定,需设置地图坐标;若不绑定,则设置位置坐标
-  path: any = []			       	                                        // NPC自动行走的路径
-  vector: any = null	       		                                      // 目标坐标
+  location!: BaseMap       			                                      // 定位地图,Map对象
+  coord!: Coord		       		                                          // 如果对象与地图绑定,需设置地图坐标;若不绑定,则设置位置坐标
+  vector!: Vector	       		                                          // 目标坐标
+  path!: Vector[]			       	                                        // NPC自动行走的路径
   // 布局相关
   frames: number = 1				                                          // 速度等级,内部计算器times多少帧变化一次
   times: number = 0				                                            // 刷新画布计数(用于循环动画状态判断)
@@ -29,7 +30,7 @@ export class Item {
     this._stage = null                                                // 与所属布景绑定
     Object.assign(this, this._params)
   }
-  update: () => void = () => { } 	                                    // 更新参数信息
+  update: (globalObj: GlobalEnv) => void = () => { }                  // 更新参数信息
   draw: (context: any, globalObj: GlobalEnv) => void = () => { }		  // 绘制
 }
 
@@ -144,6 +145,42 @@ export class PlayerItem extends Item {
       context.closePath()
       context.fill()
     }
+    this.update = (globalObj: GlobalEnv) => {
+      if (!this.coord.offset) {
+        if (this.control.orientation !== 'undefined') {
+          if (!globalObj.BaseMap.get(this.coord.x + globalObj.COS[this.control.orientation], this.coord.y + globalObj.SIN[this.control.orientation])) {
+            this.orientation = this.control.orientation
+          }
+        }
+        this.control = {}
+        const value = globalObj.BaseMap.get(this.coord.x + globalObj.COS[this.orientation], this.coord.y + globalObj.SIN[this.orientation])
+        if (value === 0) {
+          this.x += this.speed * globalObj.COS[this.orientation]
+          this.y += this.speed * globalObj.SIN[this.orientation]
+        } else if (value < 0) {
+          this.x -= globalObj.BaseMap.size * (globalObj.BaseMap.xLength - 1) * globalObj.COS[this.orientation]
+          this.y -= globalObj.BaseMap.size * (globalObj.BaseMap.yLength - 1) * globalObj.SIN[this.orientation]
+        }
+      } else {
+        if (!globalObj.BeanMap.get(this.coord.x, this.coord.y)) {
+          // 吃豆
+          globalObj.SCORE++
+          globalObj.BeanMap.set(this.coord.x, this.coord.y, 1)
+          if (globalObj.CONFIG.goods[this.coord.x + ',' + this.coord.y]) {
+            // 吃到能量豆
+            globalObj.NPCs.forEach((item) => {
+              if (item.status === 1 || item.status === 3) {
+                // 如果NPC为正常状态，则置为临时状态
+                item.timeout = 450
+                item.status = 3
+              }
+            })
+          }
+        }
+        this.x += this.speed * globalObj.COS[this.orientation]
+        this.y += this.speed * globalObj.SIN[this.orientation]
+      }
+    }
   }
 }
 
@@ -200,6 +237,83 @@ export class NpcItem extends Item {
         context.fill()
         context.closePath()
       }
+    }
+    this.update = (globalObj: GlobalEnv) => {
+      let newMap: any = null
+      if (this.status === 3 && !this.timeout) {
+        this.status = 1
+      }
+      // 到达坐标中心时计算
+      if (!this.coord.offset) {
+        if (this.status === 1) {
+          // 定时器
+          if (!this.timeout) {
+            newMap = JSON.parse(JSON.stringify(globalObj.BaseMap.data).replace(/2/g, '0'))
+            globalObj.NPCs.forEach((item) => {
+              // NPC将其它所有还处于正常状态的NPC当成一堵墙
+              if (item._id !== this._id && item.status === 1) {
+                newMap[item.coord.y][item.coord.x] = 1
+              }
+            })
+            this.path = globalObj.BaseMap.finder({
+              map: newMap,
+              start: this.coord,
+              end: globalObj.PLAYER.coord
+            })
+            if (this.path.length) {
+              this.vector = this.path[0]
+            }
+          }
+        } else if (this.status === 3) {
+          newMap = JSON.parse(JSON.stringify(globalObj.BaseMap.data).replace(/2/g, '0'))
+          globalObj.NPCs.forEach((item) => {
+            if (item._id !== this._id) {
+              newMap[item.coord.y][item.coord.x] = 1
+            }
+          })
+          this.path = globalObj.BaseMap.finder({
+            map: newMap,
+            start: globalObj.PLAYER.coord,
+            end: this.coord,
+            type: 'next'
+          })
+          if (this.path.length) {
+            this.vector = this.path[Math.floor(Math.random() * this.path.length)]
+          }
+        } else if (this.status === 4) {
+          // newMap = JSON.parse(JSON.stringify(globalObj.BaseMap.data).replace(/2/g, 0))
+          // this.path = globalObj.BaseMap.finder({
+          //   map: newMap,
+          //   start: this.coord,
+          //   end: this._params.coord
+          // })
+          // if (this.path.length) {
+          //   this.vector = this.path[0]
+          // } else {
+          //   this.status = 1
+          // }
+        }
+        // 是否转变方向
+        if (this.vector.change) {
+          this.coord.x = this.vector.x
+          this.coord.y = this.vector.y
+          const pos = globalObj.BaseMap.coord2position(this.coord.x, this.coord.y)
+          this.x = pos.x
+          this.y = pos.y
+        }
+        // 方向判定
+        if (this.vector.x > this.coord.x) {
+          this.orientation = 0
+        } else if (this.vector.x < this.coord.x) {
+          this.orientation = 2
+        } else if (this.vector.y > this.coord.y) {
+          this.orientation = 1
+        } else if (this.vector.y < this.coord.y) {
+          this.orientation = 3
+        }
+      }
+      this.x += this.speed * globalObj.COS[this.orientation]
+      this.y += this.speed * globalObj.SIN[this.orientation]
     }
   }
 }

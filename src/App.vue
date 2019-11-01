@@ -26,7 +26,7 @@ import {
 } from './components/Item'
 import {
   Map,
-  WallMap,
+  BaseMap,
   BeanMap
 } from './components/Map'
 
@@ -86,13 +86,17 @@ export default class PacMan extends Vue {
     CONFIG: MAP_DATA,
     SCORE: 0,
     LEVEL: 0,
-    LIFE: 5
+    LIFE: 5,
+    PLAYER: null,
+    NPCs: [],
+    BaseMap: null,
+    BeanMap: null
   }
   mounted() {
     this.initCanvas()
-    this.initItems()
     this.initMaps()
-    // this.animate()
+    this.initItems()
+    this.startAnimate()
   }
   initCanvas() {
     this.$canvas = getCanvasElementById('canvas')
@@ -100,105 +104,139 @@ export default class PacMan extends Vue {
     this.$canvas.height = this.globalObj.HEIGHT
     this.$context = getCanvasRenderingContext2D(this.$canvas)
   }
-  initItems() {
-    this.items.push(new LogoItem({
-      x: this.globalObj.WIDTH / 2,
-      y: this.globalObj.HEIGHT * .45,
-      width: 100,
-      height: 100,
-      frames: 3
-    }))
-    this.items.push(new NameItem({
-      x: this.globalObj.WIDTH / 2,
-      y: this.globalObj.HEIGHT * .6
-    }))
-    this.items.push(new ScoreLevelItem({
-      x: 690,
-      y: 80
-    }))
-    this.items.push(new StatusItem({
-      x: 690,
-      y: 285,
-      frames: 25
-    }))
-    this.items.push(new LifeItem({
-      x: 705,
-      y: 510,
-      width: 30,
-      height: 30
-    }))
-    for (let i = 0; i < 4; i++) {
-      this.items.push(new NpcItem({
-        x: 250 + i * 50,
-        y: 250,
-        width: 30,
-        height: 30,
-        orientation: 3,
-        color: this.globalObj.COLOR[i],
-        // location: map,
-        coord: { x: 12 + i, y: 14 },
-        vector: { x: 12 + i, y: 14 },
-        type: 2,
-        frames: 10,
-        speed: 1,
-        timeout: Math.floor(Math.random() * 120)
-      }))
-    }
-    this.items.push(new PlayerItem({
-      x: 200,
-      y: 200,
-      width: 30,
-      height: 30,
-      type: 1,
-      // location: map,
-      coord: { x: 13.5, y: 23 },
-      orientation: 2,
-      speed: 2,
-      frames: 10
-    }))
-  }
-  initMaps() {
-    this.maps.push(new WallMap({
-      x: 60,
-      y: 10,
-      data: this.globalObj.CONFIG.map,
-      yLength: this.globalObj.CONFIG.map.length,
-      xLength: this.globalObj.CONFIG.map[0].length,
-      cache: true
-    }))
-    this.maps.push(new BeanMap({
-      x: 60,
-      y: 10,
-      data: this.globalObj.CONFIG.map,
-      yLength: this.globalObj.CONFIG.map.length,
-      xLength: this.globalObj.CONFIG.map[0].length,
-      frames: 8
-    }))
-  }
   drawCanvas() {
     this.$context.clearRect(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
     this.$context.fillStyle = '#000000'
     this.$context.fillRect(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
   }
-  stopAnimate() {
-    if (this.handler) { cancelAnimationFrame(this.handler) }
+  createMap(type: string, options: any) {
+    let map: Map = new Map(options)
+    if (type === 'base') { map = new BaseMap(options) }
+    if (type === 'bean') { map = new BeanMap(options) }
+    map.data = JSON.parse(JSON.stringify(this.globalObj.CONFIG.map))
+    map.yLength = this.globalObj.CONFIG.map.length
+    map.xLength = this.globalObj.CONFIG.map[0].length
+    this.maps.push(map)
+    return map
   }
-  animate() {
+  initMaps() {
+    this.globalObj.BaseMap = this.createMap('base', {
+      x: 60,
+      y: 10,
+      cache: true
+    })
+    this.globalObj.BeanMap = this.createMap('bean', {
+      x: 60,
+      y: 10,
+      frames: 8
+    })
+  }
+  createItem(type: string, options: any) {
+    let item: Item = new Item(options)
+    if (type === 'npc') { item = new NpcItem(options) }
+    if (type === 'player') { item = new PlayerItem(options) }
+    if (item.location) {
+      const position = item.location.coord2position(item.coord.x, item.coord.y)
+      item.x = position.x
+      item.y = position.y
+    }
+    this.items.push(item)
+    return item
+  }
+  initItems() {
+    // this.items.push(new LogoItem({
+    //   x: this.globalObj.WIDTH / 2,
+    //   y: this.globalObj.HEIGHT * .45,
+    //   width: 100,
+    //   height: 100,
+    //   frames: 3
+    // }))
+    // this.items.push(new NameItem({
+    //   x: this.globalObj.WIDTH / 2,
+    //   y: this.globalObj.HEIGHT * .6
+    // }))
+    // this.items.push(new ScoreLevelItem({
+    //   x: 690,
+    //   y: 80
+    // }))
+    // this.items.push(new StatusItem({
+    //   x: 690,
+    //   y: 285,
+    //   frames: 25
+    // }))
+    // this.items.push(new LifeItem({
+    //   x: 705,
+    //   y: 510,
+    //   width: 30,
+    //   height: 30
+    // }))
+    for (let i = 0; i < 1; i++) {
+      const npcItem = this.createItem('npc', {
+        width: 30,
+        height: 30,
+        color: this.globalObj.COLOR[i],
+        location: this.globalObj.BaseMap,
+        coord: { x: 12 + i, y: 14 },
+        vector: { x: 12 + i, y: 14 },
+        orientation: 3,
+        type: 2,
+        speed: 1,
+        frames: 10,
+        timeout: Math.floor(Math.random() * 120)
+      })
+      this.globalObj.NPCs.push(npcItem)
+    }
+    this.globalObj.PLAYER = this.createItem('player', {
+      width: 30,
+      height: 30,
+      location: this.globalObj.BaseMap,
+      coord: { x: 13.5, y: 23 },
+      orientation: 2,
+      type: 1,
+      speed: 2,
+      frames: 10
+    })
+  }
+  startAnimate() {
     this.drawCanvas()
     this.currentFrame++
-    this.items.forEach((item: Item) => {
-      if (!(this.currentFrame % item.frames)) {
-        item.times = this.currentFrame / item.frames
-      }
-      item.draw(this.$context, this.globalObj)
-    })
     this.maps.forEach((map: Map) => {
       if (!(this.currentFrame % map.frames)) {
         map.times = this.currentFrame / map.frames
       }
-      map.draw(this.$context, this.globalObj)
+      if (map.cache) {
+        if (!map.imageData) {
+          this.$context.save()
+          map.draw(this.$context, this.globalObj)
+          map.imageData = this.$context.getImageData(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
+          this.$context.restore()
+        } else {
+          this.$context.putImageData(map.imageData, 0, 0)
+        }
+      } else {
+        map.draw(this.$context, this.globalObj)
+      }
+      // map.draw(this.$context, this.globalObj)
     })
-    this.handler = requestAnimationFrame(this.animate)
+    this.items.forEach((item: Item) => {
+      if (!(this.currentFrame % item.frames)) {
+        item.times = this.currentFrame / item.frames
+      }
+      if (item.status !== 2) {
+        if (item.location) {
+          item.coord = item.location.position2coord(item.x, item.y)
+        }
+        if (item.timeout) {
+          item.timeout--
+        }
+        item.update(this.globalObj)
+      }
+      item.draw(this.$context, this.globalObj)
+    })
+    this.handler = requestAnimationFrame(this.startAnimate)
+  }
+  stopAnimate() {
+    if (this.handler) { cancelAnimationFrame(this.handler) }
   }
 }
 </script>

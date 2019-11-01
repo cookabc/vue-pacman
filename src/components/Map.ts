@@ -1,4 +1,4 @@
-import { GlobalEnv } from '../helpers/Interfaces'
+import { GlobalEnv, Coord, Vector } from '../helpers/Interfaces'
 
 export class Map {
   _params: {}
@@ -14,6 +14,7 @@ export class Map {
   frames: number = 1				                                      // 速度等级,内部计算器times多少帧变化一次
   times: number = 0				                                        // 刷新画布计数(用于循环动画状态判断)
   cache: boolean = false		                                      // 是否静态（如静态则设置缓存）
+  imageData!: ImageData
   constructor(params: {} = {}) {
     this._params = params
     this._id = 0                                                  // 标志符
@@ -28,15 +29,119 @@ export class Map {
     }
     return -1
   }
+  set(x: number, y: number, value: number) {
+    if (this.data[y]) { this.data[y][x] = value }
+  }
   coord2position(cx: number, cy: number) {
     return {
       x: this.x + cx * this.size + this.size / 2,
       y: this.y + cy * this.size + this.size / 2
     }
   }
+  position2coord(x: number, y: number) {
+    const fx = Math.abs(x - this.x) % this.size - this.size / 2
+    const fy = Math.abs(y - this.y) % this.size - this.size / 2
+    return {
+      x: Math.floor((x - this.x) / this.size),
+      y: Math.floor((y - this.y) / this.size),
+      offset: Math.sqrt(fx * fx + fy * fy)
+    }
+  }
+  finder(params: any) {
+    const defaults = {
+      map: null,
+      start: {},
+      end: {},
+      type: 'path'
+    }
+    const options = Object.assign({}, defaults, params)
+    // 当起点或终点设置在墙上
+    if (options.map[options.start.y][options.start.x] || options.map[options.end.y][options.end.x]) {
+      return []
+    }
+    let finded = false
+    const result: Vector[] = []
+    const yLength: number = options.map.length
+    const xLength: number = options.map[0].length
+
+    // 步骤的映射
+    const steps: Vector[][] = []
+    for (let y = yLength; y--;) {
+      steps[y] = new Array(xLength).fill(0)
+    }
+    // 获取地图上的值
+    const _getValue = (x: number, y: number) => {
+      if (options.map[y] && typeof options.map[y][x] !== 'undefined') {
+        return options.map[y][x]
+      }
+      return -1
+    }
+    // 判定是否可走,可走放入列表
+    const _next = (to: Vector) => {
+      const value = _getValue(to.x, to.y)
+      if (value < 1) {
+        if (value === -1) {
+          to.x = (to.x + xLength) % xLength
+          to.y = (to.y + yLength) % yLength
+          to.change = 1
+        }
+        if (!steps[to.y][to.x]) {
+          result.push(to)
+        }
+      }
+    }
+    // 找线路
+    const _render = (list: Vector[]) => {
+      const newList: Vector[] = []
+      const next = (from: Vector, to: Vector) => {
+        const value = _getValue(to.x, to.y)
+        // 当前点是否可以走
+        if (value < 1) {
+          if (value === -1) {
+            to.x = (to.x + xLength) % xLength
+            to.y = (to.y + yLength) % yLength
+            to.change = 1
+          }
+          if (to.x === options.end.x && to.y === options.end.y) {
+            steps[to.y][to.x] = from
+            finded = true
+          } else if (!steps[to.y][to.x]) {
+            steps[to.y][to.x] = from
+            newList.push(to)
+          }
+        }
+      }
+      list.forEach((current: Vector) => {
+        next(current, { y: current.y + 1, x: current.x })
+        next(current, { y: current.y, x: current.x + 1 })
+        next(current, { y: current.y - 1, x: current.x })
+        next(current, { y: current.y, x: current.x - 1 })
+      })
+      if (!finded && newList.length) {
+        _render(newList)
+      }
+    }
+    _render([options.start])
+    if (finded) {
+      let current = options.end
+      if (options.type === 'path') {
+        while (current.x !== options.start.x || current.y !== options.start.y) {
+          result.unshift(current)
+          current = steps[current.y][current.x]
+        }
+      } else if (options.type === 'next') {
+        _next({ x: current.x + 1, y: current.y })
+        _next({ x: current.x, y: current.y + 1 })
+        _next({ x: current.x - 1, y: current.y })
+        _next({ x: current.x, y: current.y - 1 })
+      }
+    }
+    // console.log(result)
+    return result
+  }
 }
 
-export class WallMap extends Map {
+export class BaseMap extends Map {
   constructor(options: {}) {
     super(options)
     this.draw = (context: any, globalObj: GlobalEnv) => {
