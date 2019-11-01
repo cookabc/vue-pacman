@@ -11,6 +11,10 @@
   "rules": {
     "indent": [true, "spaces", 2],
     "interface-name": false,
+    "max-classes-per-file": [
+      true,
+      10
+    ],
     "max-line-length": [
       true,
       200
@@ -20,6 +24,10 @@
       "no-public"
     ],
     "no-consecutive-blank-lines": false,
+    "no-empty": [
+      true,
+      "allow-empty-functions"
+    ],
     "object-literal-sort-keys": false,
     "ordered-imports": false,
     "quotemark": [true, "single"],
@@ -38,6 +46,14 @@
         },
         "singleline": "never"
       }
-    ]
+    ],
+    "variable-name": {
+      "options": [
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-pascal-case"
+      ]
+    }
   }
 }

@@ -4,24 +4,24 @@ export class Map {
   _params: {}
   _id: number = 0
   _stage: any = null
-  x: number = 0				           	// 地图起点坐标
-  y: number = 0					          // 地图起点坐标
-  size: number = 20       				// 地图单元的宽度
-  data: any[] = []                // 地图数据
-  xLength: number = 0				      // 二维数组x轴长度
-  yLength: number = 0			      	// 二维数组y轴长度
+  x: number = 0				           	                                // 地图起点坐标
+  y: number = 0					                                          // 地图起点坐标
+  size: number = 20       				                                // 地图单元的宽度
+  data: any[] = []                                                // 地图数据
+  xLength: number = 0				                                      // 二维数组x轴长度
+  yLength: number = 0			      	                                // 二维数组y轴长度
   // 布局相关
-  frames: number = 1				      // 速度等级,内部计算器times多少帧变化一次
-  times: number = 0				        // 刷新画布计数(用于循环动画状态判断)
-  cache: boolean = false		      // 是否静态（如静态则设置缓存）
-  update: Function = () => { } 	  // 更新地图数据
-  draw: Function = () => { }		  // 绘制
+  frames: number = 1				                                      // 速度等级,内部计算器times多少帧变化一次
+  times: number = 0				                                        // 刷新画布计数(用于循环动画状态判断)
+  cache: boolean = false		                                      // 是否静态（如静态则设置缓存）
   constructor(params: {} = {}) {
     this._params = params
-    this._id = 0;                 //标志符
-    this._stage = null;           //与所属布景绑定
+    this._id = 0                                                  // 标志符
+    this._stage = null                                            // 与所属布景绑定
     Object.assign(this, this._params)
   }
+  update: () => void = () => { } 	                                // 更新地图数据
+  draw: (context: any, globalObj: GlobalEnv) => void = () => { }  // 绘制
   get(px: number, py: number) {
     if (this.data[py] && typeof this.data[py][px] !== 'undefined') {
       return this.data[py][px]

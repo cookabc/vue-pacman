@@ -92,7 +92,7 @@ export default class PacMan extends Vue {
     this.initCanvas()
     this.initItems()
     this.initMaps()
-    this.animate()
+    // this.animate()
   }
   initCanvas() {
     this.$canvas = getCanvasElementById('canvas')
@@ -103,18 +103,18 @@ export default class PacMan extends Vue {
   initItems() {
     this.items.push(new LogoItem({
       x: this.globalObj.WIDTH / 2,
-			y: this.globalObj.HEIGHT * .45,
-			width: 100,
-			height: 100,
+      y: this.globalObj.HEIGHT * .45,
+      width: 100,
+      height: 100,
       frames: 3
     }))
     this.items.push(new NameItem({
       x: this.globalObj.WIDTH / 2,
-			y: this.globalObj.HEIGHT * .6
+      y: this.globalObj.HEIGHT * .6
     }))
     this.items.push(new ScoreLevelItem({
       x: 690,
-			y: 80
+      y: 80
     }))
     this.items.push(new StatusItem({
       x: 690,
