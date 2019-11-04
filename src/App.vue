@@ -112,17 +112,28 @@ export default class PacMan extends Vue {
     this.$context.fillStyle = '#000000'
     this.$context.fillRect(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
   }
+  resetItems() {
+    this.globalObj.STATUS = 1
+    this.items.forEach((item) => {
+      Object.assign(item, item._params)
+      if (item.location) {
+        const position = item.location.coord2position(item.coord.x, item.coord.y)
+        item.x = position.x
+        item.y = position.y
+      }
+    })
+  }
   updateStage() {
     if (this.globalObj.STATUS === 1) {
       this.globalObj.NPCs.forEach((item) => {
         if (this.globalObj.BaseMap
-          && !this.globalObj.BaseMap.get(item.coord.x,item.coord.y)
+          && !this.globalObj.BaseMap.get(item.coord.x, item.coord.y)
           && !this.globalObj.BaseMap.get(this.globalObj.PLAYER.coord.x, this.globalObj.PLAYER.coord.y)) {
           const dx = item.x - this.globalObj.PLAYER.x
           const dy = item.y - this.globalObj.PLAYER.y
           // 物体检测
           if (dx * dx + dy * dy < 750 && item.status !== 4) {
-            if(item.status === 3){
+            if (item.status === 3) {
               item.status = 4
               this.globalObj.SCORE += 10
             } else {
@@ -133,14 +144,13 @@ export default class PacMan extends Vue {
         }
       })
     } else if (this.globalObj.STATUS === 3) {
-      // this.globalObj.LIFE--
-      // if(this.globalObj.LIFE){
-      //   this.resetItems()
-      // } else {
-      //   var stages = game.getStages()
-      //   game.setStage(stages.length-1)
-      //   return false
-      // }
+      if (this.globalObj.LIFE > 1) {
+        this.globalObj.LIFE--
+        this.resetItems()
+      } else {
+        // this.gameOver()
+        return false
+      }
     }
     return true
   }

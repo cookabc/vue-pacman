@@ -2,7 +2,7 @@ import { GlobalEnv, Coord, Vector } from '../helpers/Interfaces'
 import { BaseMap } from './Map'
 
 export class Item {
-  _params: {}
+  _params: any
   _id: number = 0
   _stage: any = null
   x: number = 0				           	                                    // 位置坐标:横坐标
@@ -99,7 +99,7 @@ export class StatusItem extends Item {
   constructor(options: {}) {
     super(options)
     this.draw = (context: any, globalObj: GlobalEnv) => {
-      if (globalObj.STATUS == 2 && this.times % 2) {
+      if (globalObj.STATUS === 2 && this.times % 2) {
         context.font = '24px Helvetica'
         context.textAlign = 'left'
         context.textBaseline = 'center'
@@ -216,27 +216,29 @@ export class NpcItem extends Item {
     this.draw = (context: any, globalObj: GlobalEnv) => {
       let isSick = false
       if (this.status === 3) {
-        isSick = true // this.timeout > 80 || this.times % 2 ? true : false
+        isSick = this.timeout > 80 || this.times % 2 ? true : false
       }
-      // Draw Body
-      context.fillStyle = isSick ? '#BABABA' : this.color
-      context.beginPath()
-      context.arc(this.x, this.y, this.width / 2, 0, Math.PI, true)
-      switch (this.times % 2) {
-        case 0:
-          context.lineTo(this.x - this.width * .5, this.y + this.height * .4)
-          context.quadraticCurveTo(this.x - this.width * .4, this.y + this.height * .5, this.x - this.width * .2, this.y + this.height * .3)
-          context.quadraticCurveTo(this.x, this.y + this.height * .5, this.x + this.width * .2, this.y + this.height * .3)
-          context.quadraticCurveTo(this.x + this.width * .4, this.y + this.height * .5, this.x + this.width * .5, this.y + this.height * .4)
-          break
-        case 1:
-          context.lineTo(this.x - this.width * .5, this.y + this.height * .3)
-          context.quadraticCurveTo(this.x - this.width * .25, this.y + this.height * .5, this.x, this.y + this.height * .3)
-          context.quadraticCurveTo(this.x - this.width * .25, this.y + this.height * .5, this.x + this.width * .5, this.y + this.height * .3)
-          break
+      if (this.status !== 4) {
+        // Draw Body
+        context.fillStyle = isSick ? '#BABABA' : this.color
+        context.beginPath()
+        context.arc(this.x, this.y, this.width / 2, 0, Math.PI, true)
+        switch (this.times % 2) {
+          case 0:
+            context.lineTo(this.x - this.width * .5, this.y + this.height * .4)
+            context.quadraticCurveTo(this.x - this.width * .4, this.y + this.height * .5, this.x - this.width * .2, this.y + this.height * .3)
+            context.quadraticCurveTo(this.x, this.y + this.height * .5, this.x + this.width * .2, this.y + this.height * .3)
+            context.quadraticCurveTo(this.x + this.width * .4, this.y + this.height * .5, this.x + this.width * .5, this.y + this.height * .4)
+            break
+          case 1:
+            context.lineTo(this.x - this.width * .5, this.y + this.height * .3)
+            context.quadraticCurveTo(this.x - this.width * .25, this.y + this.height * .5, this.x, this.y + this.height * .3)
+            context.quadraticCurveTo(this.x - this.width * .25, this.y + this.height * .5, this.x + this.width * .5, this.y + this.height * .3)
+            break
+        }
+        context.fill()
+        context.closePath()
       }
-      context.fill()
-      context.closePath()
       context.fillStyle = '#FFF'
       if (isSick) {
         // Draw Eyeball
@@ -314,7 +316,7 @@ export class NpcItem extends Item {
           this.path = globalObj.BaseMap.finder({
             map: newMap,
             start: this.coord,
-            end: this.coord
+            end: this._params.coord
           })
           if (this.path.length) {
             this.vector = this.path[0]
