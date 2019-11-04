@@ -75,9 +75,9 @@ export default class PacMan extends Vue {
   currentFrame: number = 0
   handler: number = 0
   stage!: Stage
-  status: number = 0
   items: Item[] = []
   maps: Map[] = []
+  timeout: number = 0
   globalObj: GlobalEnv = {
     WIDTH: CANVAS_WIDTH,
     HEIGHT: CANVAS_HEIGHT,
@@ -91,12 +91,14 @@ export default class PacMan extends Vue {
     PLAYER: null,
     NPCs: [],
     BaseMap: null,
-    BeanMap: null
+    BeanMap: null,
+    STATUS: 2 // 布景状态, 0表示未激活/结束, 1表示正常, 2表示暂停, 3表示临时状态
   }
   mounted() {
     this.initCanvas()
     this.initMaps()
     this.initItems()
+    this.bindEvents()
     this.startAnimate()
   }
   initCanvas() {
@@ -109,6 +111,38 @@ export default class PacMan extends Vue {
     this.$context.clearRect(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
     this.$context.fillStyle = '#000000'
     this.$context.fillRect(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
+  }
+  updateStage() {
+    if (this.globalObj.STATUS === 1) {
+      this.globalObj.NPCs.forEach((item) => {
+        if (this.globalObj.BaseMap
+          && !this.globalObj.BaseMap.get(item.coord.x,item.coord.y)
+          && !this.globalObj.BaseMap.get(this.globalObj.PLAYER.coord.x, this.globalObj.PLAYER.coord.y)) {
+          const dx = item.x - this.globalObj.PLAYER.x
+          const dy = item.y - this.globalObj.PLAYER.y
+          // 物体检测
+          if (dx * dx + dy * dy < 750 && item.status !== 4) {
+            if(item.status === 3){
+              item.status = 4
+              this.globalObj.SCORE += 10
+            } else {
+              this.globalObj.STATUS = 3
+              // this.globalObj.timeout = 30
+            }
+          }
+        }
+      })
+    } else if (this.globalObj.STATUS === 3) {
+      // this.globalObj.LIFE--
+      // if(this.globalObj.LIFE){
+      //   this.resetItems()
+      // } else {
+      //   var stages = game.getStages()
+      //   game.setStage(stages.length-1)
+      //   return false
+      // }
+    }
+    return true
   }
   createMap(type: string, options: any) {
     let map: Map = new Map(options)
@@ -156,21 +190,21 @@ export default class PacMan extends Vue {
     //   x: this.globalObj.WIDTH / 2,
     //   y: this.globalObj.HEIGHT * .6
     // }))
-    // this.items.push(new ScoreLevelItem({
-    //   x: 690,
-    //   y: 80
-    // }))
-    // this.items.push(new StatusItem({
-    //   x: 690,
-    //   y: 285,
-    //   frames: 25
-    // }))
-    // this.items.push(new LifeItem({
-    //   x: 705,
-    //   y: 510,
-    //   width: 30,
-    //   height: 30
-    // }))
+    this.items.push(new ScoreLevelItem({
+      x: 690,
+      y: 80
+    }))
+    this.items.push(new StatusItem({
+      x: 690,
+      y: 285,
+      frames: 25
+    }))
+    this.items.push(new LifeItem({
+      x: 705,
+      y: 510,
+      width: 30,
+      height: 30
+    }))
     for (let i = 0; i < 1; i++) {
       const npcItem = this.createItem('npc', {
         width: 30,
@@ -203,7 +237,7 @@ export default class PacMan extends Vue {
       switch (e.keyCode) {
         case 13: // 回车
         case 32: // 空格
-          this.status = this.status === 2 ? 1 : 2
+          this.globalObj.STATUS = this.globalObj.STATUS === 2 ? 1 : 2
           break
       }
       e.preventDefault()
@@ -212,38 +246,43 @@ export default class PacMan extends Vue {
   startAnimate() {
     this.drawCanvas()
     this.currentFrame++
-    this.maps.forEach((map: Map) => {
-      if (!(this.currentFrame % map.frames)) {
-        map.times = this.currentFrame / map.frames
-      }
-      if (map.cache) {
-        if (!map.imageData) {
-          this.$context.save()
-          map.draw(this.$context, this.globalObj)
-          map.imageData = this.$context.getImageData(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
-          this.$context.restore()
+    if (this.timeout) {
+      this.timeout--
+    }
+    if (this.updateStage() !== false) {
+      this.maps.forEach((map: Map) => {
+        if (!(this.currentFrame % map.frames)) {
+          map.times = this.currentFrame / map.frames
+        }
+        if (map.cache) {
+          if (!map.imageData) {
+            this.$context.save()
+            map.draw(this.$context, this.globalObj)
+            map.imageData = this.$context.getImageData(0, 0, this.globalObj.WIDTH, this.globalObj.HEIGHT)
+            this.$context.restore()
+          } else {
+            this.$context.putImageData(map.imageData, 0, 0)
+          }
         } else {
-          this.$context.putImageData(map.imageData, 0, 0)
+          map.draw(this.$context, this.globalObj)
         }
-      } else {
-        map.draw(this.$context, this.globalObj)
-      }
-    })
-    this.items.forEach((item: Item) => {
-      if (!(this.currentFrame % item.frames)) {
-        item.times = this.currentFrame / item.frames
-      }
-      if (item.status !== 2) {
-        if (item.location) {
-          item.coord = item.location.position2coord(item.x, item.y)
+      })
+      this.items.forEach((item: Item) => {
+        if (!(this.currentFrame % item.frames)) {
+          item.times = this.currentFrame / item.frames
         }
-        if (item.timeout) {
-          item.timeout--
+        if (this.globalObj.STATUS === 1 && item.status !== 2) {
+          if (item.location) {
+            item.coord = item.location.position2coord(item.x, item.y)
+          }
+          if (item.timeout) {
+            item.timeout--
+          }
+          item.update(this.globalObj)
         }
-        item.update(this.globalObj)
-      }
-      item.draw(this.$context, this.globalObj)
-    })
+        item.draw(this.$context, this.globalObj)
+      })
+    }
     this.handler = requestAnimationFrame(this.startAnimate)
   }
   stopAnimate() {

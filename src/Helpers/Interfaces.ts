@@ -11,7 +11,8 @@ export interface GlobalEnv {
   PLAYER: any,
   NPCs: any[],
   BaseMap: any,
-  BeanMap: any
+  BeanMap: any,
+  STATUS: number
 }
 
 export interface Coord {

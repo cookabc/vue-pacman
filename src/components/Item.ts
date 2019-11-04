@@ -98,12 +98,14 @@ export class ScoreLevelItem extends Item {
 export class StatusItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any) => {
-      context.font = '24px Helvetica'
-      context.textAlign = 'left'
-      context.textBaseline = 'center'
-      context.fillStyle = '#FFF'
-      context.fillText('PAUSE', this.x, this.y)
+    this.draw = (context: any, globalObj: GlobalEnv) => {
+      if (globalObj.STATUS == 2 && this.times % 2) {
+        context.font = '24px Helvetica'
+        context.textAlign = 'left'
+        context.textBaseline = 'center'
+        context.fillStyle = '#FFF'
+        context.fillText('PAUSE', this.x, this.y)
+      }
     }
   }
 }
@@ -133,13 +135,17 @@ export class LifeItem extends Item {
 export class PlayerItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.fillStyle = '#FFE600'
       context.beginPath()
-      if (this.times % 2) {
-        context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.20) * Math.PI, (0.5 * this.orientation - 0.20) * Math.PI, false)
+      if (globalObj.STATUS !== 3) {
+        if (this.times % 2) {
+          context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.20) * Math.PI, (0.5 * this.orientation - 0.20) * Math.PI, false)
+        } else {
+          context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.01) * Math.PI, (0.5 * this.orientation - 0.01) * Math.PI, false)
+        }
       } else {
-        context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.01) * Math.PI, (0.5 * this.orientation - 0.01) * Math.PI, false)
+        context.arc(this.x, this.y, this.width / 2, (.5 * this.orientation + 1) * Math.PI, (.5 * this.orientation - 1) * Math.PI, false)
       }
       context.lineTo(this.x, this.y)
       context.closePath()
@@ -166,10 +172,10 @@ export class PlayerItem extends Item {
           // 吃豆
           globalObj.SCORE++
           globalObj.BeanMap.set(this.coord.x, this.coord.y, 1)
-          if (globalObj.CONFIG.goods[this.coord.x + ',' + this.coord.y]) {
-            // 吃到能量豆
+          // 吃到能量豆
+          if (globalObj.CONFIG.goods.includes(`${this.coord.x},${this.coord.y}`)) {
             globalObj.NPCs.forEach((item) => {
-              if (item.status === 1 || item.status === 3) {
+              if (item.status === 1) {
                 // 如果NPC为正常状态，则置为临时状态
                 item.timeout = 450
                 item.status = 3
@@ -209,8 +215,11 @@ export class NpcItem extends Item {
     super(options)
     this.draw = (context: any, globalObj: GlobalEnv) => {
       let isSick = false
+      if (this.status === 3) {
+        isSick = true // this.timeout > 80 || this.times % 2 ? true : false
+      }
       // Draw Body
-      context.fillStyle = this.color
+      context.fillStyle = isSick ? '#BABABA' : this.color
       context.beginPath()
       context.arc(this.x, this.y, this.width / 2, 0, Math.PI, true)
       switch (this.times % 2) {
@@ -301,17 +310,17 @@ export class NpcItem extends Item {
             this.vector = this.path[Math.floor(Math.random() * this.path.length)]
           }
         } else if (this.status === 4) {
-          // newMap = JSON.parse(JSON.stringify(globalObj.BaseMap.data).replace(/2/g, 0))
-          // this.path = globalObj.BaseMap.finder({
-          //   map: newMap,
-          //   start: this.coord,
-          //   end: this._params.coord
-          // })
-          // if (this.path.length) {
-          //   this.vector = this.path[0]
-          // } else {
-          //   this.status = 1
-          // }
+          newMap = JSON.parse(JSON.stringify(globalObj.BaseMap.data).replace(/2/g, '0'))
+          this.path = globalObj.BaseMap.finder({
+            map: newMap,
+            start: this.coord,
+            end: this.coord
+          })
+          if (this.path.length) {
+            this.vector = this.path[0]
+          } else {
+            this.status = 1
+          }
         }
         // 是否转变方向
         if (this.vector.change) {
