@@ -181,6 +181,26 @@ export class PlayerItem extends Item {
         this.y += this.speed * globalObj.SIN[this.orientation]
       }
     }
+    this.bind()
+  }
+  bind() {
+    window.addEventListener('keydown', (e) => {
+      switch (e.keyCode) {
+        case 39: // 右
+          this.control = { orientation: 0 }
+          break
+        case 40: // 下
+          this.control = { orientation: 1 }
+          break
+        case 37: // 左
+          this.control = { orientation: 2 }
+          break
+        case 38: // 上
+          this.control = { orientation: 3 }
+          break
+      }
+      e.preventDefault()
+    })
   }
 }
 

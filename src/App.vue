@@ -75,6 +75,7 @@ export default class PacMan extends Vue {
   currentFrame: number = 0
   handler: number = 0
   stage!: Stage
+  status: number = 0
   items: Item[] = []
   maps: Map[] = []
   globalObj: GlobalEnv = {
@@ -197,6 +198,17 @@ export default class PacMan extends Vue {
       frames: 10
     })
   }
+  bindEvents() {
+    window.addEventListener('keydown', (e) => {
+      switch (e.keyCode) {
+        case 13: // 回车
+        case 32: // 空格
+          this.status = this.status === 2 ? 1 : 2
+          break
+      }
+      e.preventDefault()
+    })
+  }
   startAnimate() {
     this.drawCanvas()
     this.currentFrame++
@@ -216,7 +228,6 @@ export default class PacMan extends Vue {
       } else {
         map.draw(this.$context, this.globalObj)
       }
-      // map.draw(this.$context, this.globalObj)
     })
     this.items.forEach((item: Item) => {
       if (!(this.currentFrame % item.frames)) {

@@ -136,7 +136,6 @@ export class Map {
         _next({ x: current.x, y: current.y - 1 })
       }
     }
-    // console.log(result)
     return result
   }
 }
