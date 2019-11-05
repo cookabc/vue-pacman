@@ -1,7 +1,6 @@
 <template>
   <div class="pac-man">
     <canvas id="canvas" class="canvas"></canvas>
-    <button class="btn" @click="setStage(1)">Start</button>
   </div>
 </template>
 
@@ -81,6 +80,36 @@ export default class PacMan extends Vue {
     this.initSplashStage()
     this.initMainStage()
     this.initEndStage()
+    window.addEventListener('keydown', (e) => {
+      switch (e.keyCode) {
+        case 13: // 回车
+        case 32: // 空格
+          if (this.currentIndex === 0) {
+            this.nextStage()
+          } else if (this.currentIndex === this.stages.length - 1) {
+            this.globalObj.SCORE = 0
+            this.globalObj.LIFE = 5
+            this.nextStage()
+          } else {
+            const STATUS = this.stages[this.currentIndex].status
+            this.stages[this.currentIndex].status = STATUS === 2 ? 1 : 2
+          }
+          break
+        case 39: // 右
+          this.stages[this.currentIndex].PLAYER.control = { orientation: 0 }
+          break
+        case 40: // 下
+          this.stages[this.currentIndex].PLAYER.control = { orientation: 1 }
+          break
+        case 37: // 左
+          this.stages[this.currentIndex].PLAYER.control = { orientation: 2 }
+          break
+        case 38: // 上
+          this.stages[this.currentIndex].PLAYER.control = { orientation: 3 }
+          break
+      }
+      e.preventDefault()
+    })
   }
   initSplashStage() {
     const stage = new SplashStage({
@@ -183,7 +212,7 @@ export default class PacMan extends Vue {
     if (this.currentIndex < this.stages.length - 1) {
       this.setStage(++this.currentIndex)
     } else {
-      throw new Error('unfound new stage.')
+      this.setStage(0)
     }
   }
   startAnimate() {
@@ -256,7 +285,7 @@ export default class PacMan extends Vue {
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 .btn {
   position: fixed;
@@ -273,10 +302,6 @@ export default class PacMan extends Vue {
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-}
-canvas{
-  display:block;
-  background: #000;
+  height: 100vh;
 }
 </style>

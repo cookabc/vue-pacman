@@ -103,17 +103,6 @@ export class SplashStage extends Stage {
   constructor(options: {}) {
     super(options)
   }
-  bind(callback: () => void) {
-    window.addEventListener('keydown', (e) => {
-      switch (e.keyCode) {
-        case 13: // 回车
-        case 32: // 空格
-          callback()
-          break
-      }
-      e.preventDefault()
-    })
-  }
 }
 
 export class GameStage extends Stage {
@@ -152,18 +141,6 @@ export class GameStage extends Stage {
         }
       }
     }
-    this.bind()
-  }
-  bind() {
-    window.addEventListener('keydown', (e) => {
-      switch (e.keyCode) {
-        case 13: // 回车
-        case 32: // 空格
-          this.status = this.status === 2 ? 1 : 2
-          break
-      }
-      e.preventDefault()
-    })
   }
 }
 
