@@ -1,7 +1,8 @@
-import { GlobalEnv, Coord, Vector } from '../helpers/Interfaces'
+import { GlobalEnv, Vector } from '../helpers/Interfaces'
+import { Stage } from './Stage'
 
 export class Map {
-  _params: {}
+  _params: any
   _id: number = 0
   _stage: any = null
   x: number = 0				           	                                // 地图起点坐标
@@ -14,15 +15,15 @@ export class Map {
   frames: number = 1				                                      // 速度等级,内部计算器times多少帧变化一次
   times: number = 0				                                        // 刷新画布计数(用于循环动画状态判断)
   cache: boolean = false		                                      // 是否静态（如静态则设置缓存）
-  imageData!: ImageData
+  imageData!: ImageData | null
   constructor(params: {} = {}) {
     this._params = params
     this._id = 0                                                  // 标志符
     this._stage = null                                            // 与所属布景绑定
     Object.assign(this, this._params)
   }
-  update: () => void = () => { } 	                                // 更新地图数据
-  draw: (context: any, globalObj: GlobalEnv) => void = () => { }  // 绘制
+  update: () => void = () => { } 	                                              // 更新地图数据
+  draw: (context: any, globalObj: GlobalEnv, stage: Stage) => void = () => { }  // 绘制
   get(px: number, py: number) {
     if (this.data[py] && typeof this.data[py][px] !== 'undefined') {
       return this.data[py][px]
@@ -143,7 +144,7 @@ export class Map {
 export class BaseMap extends Map {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv) => {
+    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
       context.lineWidth = 2
       for (let j = 0; j < this.yLength; j++) {
         for (let i = 0; i < this.xLength; i++) {
@@ -163,7 +164,7 @@ export class BaseMap extends Map {
               code[3] = 1
             }
             if (code.includes(1)) {
-              context.strokeStyle = value === 2 ? '#FFF' : globalObj.CONFIG.wall_color
+              context.strokeStyle = value === 2 ? '#FFF' : stage.CONFIG.wall_color
               const pos = this.coord2position(i, j)
               switch (code.join('')) {
                 case '1100':
@@ -213,13 +214,13 @@ export class BaseMap extends Map {
 export class BeanMap extends Map {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv) => {
+    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
       for (let j = 0; j < this.yLength; j++) {
         for (let i = 0; i < this.xLength; i++) {
           if (!this.get(i, j)) {
             const pos = this.coord2position(i, j)
             context.fillStyle = '#F5F5DC'
-            if (globalObj.CONFIG.goods.includes(`${i},${j}`)) {
+            if (stage.CONFIG.goods.includes(`${i},${j}`)) {
               context.beginPath()
               context.arc(pos.x, pos.y, 3 + this.times % 2, 0, 2 * Math.PI, true)
               context.fill()

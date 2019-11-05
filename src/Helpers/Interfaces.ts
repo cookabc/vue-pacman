@@ -1,18 +1,10 @@
 export interface GlobalEnv {
-  WIDTH: number,
-  HEIGHT: number,
-  SCORE: number,
-  LEVEL: number,
-  LIFE: number,
   COLOR: string[],
   COS: number[],
   SIN: number[],
-  CONFIG: any,
-  PLAYER: any,
-  NPCs: any[],
-  BaseMap: any,
-  BeanMap: any,
-  STATUS: number
+  SCORE: number,
+  LEVEL: number,
+  LIFE: number
 }
 
 export interface Coord {
