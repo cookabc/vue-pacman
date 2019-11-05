@@ -1,5 +1,6 @@
 {
   "name": "vue-pacman",
+  "homepage": "https://cookabc.github.io/vue-pacman",
   "version": "0.1.0",
   "private": true,
   "scripts": {
