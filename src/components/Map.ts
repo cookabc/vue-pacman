@@ -23,7 +23,7 @@ export class Map {
     Object.assign(this, this._params)
   }
   update: () => void = () => { } 	                                              // 更新地图数据
-  draw: (context: any, globalObj: GlobalEnv, stage: Stage) => void = () => { }  // 绘制
+  draw: (context: any, globalObj: GlobalEnv) => void = () => { }  // 绘制
   get(px: number, py: number) {
     if (this.data[py] && typeof this.data[py][px] !== 'undefined') {
       return this.data[py][px]
@@ -144,7 +144,7 @@ export class Map {
 export class BaseMap extends Map {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.lineWidth = 2
       for (let j = 0; j < this.yLength; j++) {
         for (let i = 0; i < this.xLength; i++) {
@@ -164,7 +164,7 @@ export class BaseMap extends Map {
               code[3] = 1
             }
             if (code.includes(1)) {
-              context.strokeStyle = value === 2 ? '#FFF' : stage.CONFIG.wall_color
+              context.strokeStyle = value === 2 ? '#FFF' : this._stage.CONFIG.wall_color
               const pos = this.coord2position(i, j)
               switch (code.join('')) {
                 case '1100':
@@ -214,13 +214,13 @@ export class BaseMap extends Map {
 export class BeanMap extends Map {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       for (let j = 0; j < this.yLength; j++) {
         for (let i = 0; i < this.xLength; i++) {
           if (!this.get(i, j)) {
             const pos = this.coord2position(i, j)
             context.fillStyle = '#F5F5DC'
-            if (stage.CONFIG.goods.includes(`${i},${j}`)) {
+            if (this._stage.CONFIG.goods.includes(`${i},${j}`)) {
               context.beginPath()
               context.arc(pos.x, pos.y, 3 + this.times % 2, 0, 2 * Math.PI, true)
               context.fill()

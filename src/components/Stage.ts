@@ -51,6 +51,7 @@ export class Stage {
       item.x = position.x
       item.y = position.y
     }
+    item._stage = this
     this.items.push(item)
     return item
   }
@@ -74,6 +75,7 @@ export class Stage {
     map.data = JSON.parse(JSON.stringify(map.data))
     map.yLength = map.data.length
     map.xLength = map.data[0].length
+    map._stage = this
     this.maps.push(map)
     return map
   }
@@ -138,7 +140,6 @@ export class GameStage extends Stage {
         })
         // 当没有物品的时候，进入下一关
         if (JSON.stringify(this.BeanMap.data).indexOf('0') < 0) {
-          debugger
           return true
         }
       } else if (this.status === 3 && !this.timeout) {

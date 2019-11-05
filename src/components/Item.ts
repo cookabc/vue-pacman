@@ -31,8 +31,8 @@ export class Item {
     this._stage = null                                                // 与所属布景绑定
     Object.assign(this, this._params)
   }
-  update: (globalObj: GlobalEnv, stage: Stage) => void = () => { }                // 更新参数信息
-  draw: (context: any, globalObj: GlobalEnv, stage: Stage) => void = () => { }		// 绘制
+  update: (globalObj: GlobalEnv) => void = () => { }                // 更新参数信息
+  draw: (context: any, globalObj: GlobalEnv) => void = () => { }		// 绘制
 }
 
 export class LogoItem extends Item {
@@ -58,7 +58,7 @@ export class LogoItem extends Item {
 export class NameItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.font = 'bold 42px Helvetica'
       context.textAlign = 'center'
       context.textBaseline = 'middle'
@@ -71,7 +71,7 @@ export class NameItem extends Item {
 export class ScoreLevelItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.font = 'bold 26px Helvetica'
       context.textAlign = 'left'
       context.textBaseline = 'bottom'
@@ -99,8 +99,8 @@ export class ScoreLevelItem extends Item {
 export class StatusItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
-      if (stage.status === 2 && this.times % 2) {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
+      if (this._stage.status === 2 && this.times % 2) {
         context.font = '24px Helvetica'
         context.textAlign = 'left'
         context.textBaseline = 'center'
@@ -114,7 +114,7 @@ export class StatusItem extends Item {
 export class LifeItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       for (let i = 0; i < globalObj.LIFE; i++) {
         const shiftX = this.x + 40 * i
         context.fillStyle = '#FFE600'
@@ -136,50 +136,50 @@ export class LifeItem extends Item {
 export class PlayerItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.fillStyle = '#FFE600'
       context.beginPath()
-      if (stage.status !== 3) {
+      if (this._stage.status !== 3) {
         if (this.times % 2) {
           context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.20) * Math.PI, (0.5 * this.orientation - 0.20) * Math.PI, false)
         } else {
           context.arc(this.x, this.y, this.width / 2, (0.5 * this.orientation + 0.01) * Math.PI, (0.5 * this.orientation - 0.01) * Math.PI, false)
         }
-      } else if (stage.timeout) {
+      } else if (this._stage.timeout) {
         context.arc(
           this.x, this.y,
-          this.width / 2, (.5 * this.orientation + 1 - .02 * stage.timeout) * Math.PI,
-          (.5 * this.orientation - 1 + .02 * stage.timeout) * Math.PI,
+          this.width / 2, (.5 * this.orientation + 1 - .02 * this._stage.timeout) * Math.PI,
+          (.5 * this.orientation - 1 + .02 * this._stage.timeout) * Math.PI,
           false)
       }
       context.lineTo(this.x, this.y)
       context.closePath()
       context.fill()
     }
-    this.update = (globalObj: GlobalEnv, stage: Stage) => {
+    this.update = (globalObj: GlobalEnv) => {
       if (!this.coord.offset) {
         if (this.control.orientation !== 'undefined') {
-          if (!stage.BaseMap.get(this.coord.x + globalObj.COS[this.control.orientation], this.coord.y + globalObj.SIN[this.control.orientation])) {
+          if (!this._stage.BaseMap.get(this.coord.x + globalObj.COS[this.control.orientation], this.coord.y + globalObj.SIN[this.control.orientation])) {
             this.orientation = this.control.orientation
           }
         }
         this.control = {}
-        const value = stage.BaseMap.get(this.coord.x + globalObj.COS[this.orientation], this.coord.y + globalObj.SIN[this.orientation])
+        const value = this._stage.BaseMap.get(this.coord.x + globalObj.COS[this.orientation], this.coord.y + globalObj.SIN[this.orientation])
         if (value === 0) {
           this.x += this.speed * globalObj.COS[this.orientation]
           this.y += this.speed * globalObj.SIN[this.orientation]
         } else if (value < 0) {
-          this.x -= stage.BaseMap.size * (stage.BaseMap.xLength - 1) * globalObj.COS[this.orientation]
-          this.y -= stage.BaseMap.size * (stage.BaseMap.yLength - 1) * globalObj.SIN[this.orientation]
+          this.x -= this._stage.BaseMap.size * (this._stage.BaseMap.xLength - 1) * globalObj.COS[this.orientation]
+          this.y -= this._stage.BaseMap.size * (this._stage.BaseMap.yLength - 1) * globalObj.SIN[this.orientation]
         }
       } else {
-        if (!stage.BeanMap.get(this.coord.x, this.coord.y)) {
+        if (!this._stage.BeanMap.get(this.coord.x, this.coord.y)) {
           // 吃豆
           globalObj.SCORE++
-          stage.BeanMap.set(this.coord.x, this.coord.y, 1)
+          this._stage.BeanMap.set(this.coord.x, this.coord.y, 1)
           // 吃到能量豆
-          if (stage.CONFIG.goods.includes(`${this.coord.x},${this.coord.y}`)) {
-            stage.NPCs.forEach((item) => {
+          if (this._stage.CONFIG.goods.includes(`${this.coord.x},${this.coord.y}`)) {
+            this._stage.NPCs.forEach((item: Item) => {
               if (item.status === 1) {
                 // 如果NPC为正常状态，则置为临时状态
                 item.timeout = 450
@@ -218,7 +218,7 @@ export class PlayerItem extends Item {
 export class NpcItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       let isSick = false
       if (this.status === 3) {
         isSick = this.timeout > 80 || this.times % 2 ? true : false
@@ -274,7 +274,7 @@ export class NpcItem extends Item {
         context.closePath()
       }
     }
-    this.update = (globalObj: GlobalEnv, stage: Stage) => {
+    this.update = (globalObj: GlobalEnv) => {
       let newMap: any = null
       if (this.status === 3 && !this.timeout) {
         this.status = 1
@@ -284,32 +284,32 @@ export class NpcItem extends Item {
         if (this.status === 1) {
           // 定时器
           if (!this.timeout) {
-            newMap = JSON.parse(JSON.stringify(stage.BaseMap.data).replace(/2/g, '0'))
-            stage.NPCs.forEach((item) => {
+            newMap = JSON.parse(JSON.stringify(this._stage.BaseMap.data).replace(/2/g, '0'))
+            this._stage.NPCs.forEach((item: Item) => {
               // NPC将其它所有还处于正常状态的NPC当成一堵墙
               if (item._id !== this._id && item.status === 1) {
                 newMap[item.coord.y][item.coord.x] = 1
               }
             })
-            this.path = stage.BaseMap.finder({
+            this.path = this._stage.BaseMap.finder({
               map: newMap,
               start: this.coord,
-              end: stage.PLAYER.coord
+              end: this._stage.PLAYER.coord
             })
             if (this.path.length) {
               this.vector = this.path[0]
             }
           }
         } else if (this.status === 3) {
-          newMap = JSON.parse(JSON.stringify(stage.BaseMap.data).replace(/2/g, '0'))
-          stage.NPCs.forEach((item) => {
+          newMap = JSON.parse(JSON.stringify(this._stage.BaseMap.data).replace(/2/g, '0'))
+          this._stage.NPCs.forEach((item: Item) => {
             if (item._id !== this._id) {
               newMap[item.coord.y][item.coord.x] = 1
             }
           })
-          this.path = stage.BaseMap.finder({
+          this.path = this._stage.BaseMap.finder({
             map: newMap,
-            start: stage.PLAYER.coord,
+            start: this._stage.PLAYER.coord,
             end: this.coord,
             type: 'next'
           })
@@ -317,8 +317,8 @@ export class NpcItem extends Item {
             this.vector = this.path[Math.floor(Math.random() * this.path.length)]
           }
         } else if (this.status === 4) {
-          newMap = JSON.parse(JSON.stringify(stage.BaseMap.data).replace(/2/g, '0'))
-          this.path = stage.BaseMap.finder({
+          newMap = JSON.parse(JSON.stringify(this._stage.BaseMap.data).replace(/2/g, '0'))
+          this.path = this._stage.BaseMap.finder({
             map: newMap,
             start: this.coord,
             end: this._params.coord
@@ -333,7 +333,7 @@ export class NpcItem extends Item {
         if (this.vector.change) {
           this.coord.x = this.vector.x
           this.coord.y = this.vector.y
-          const pos = stage.BaseMap.coord2position(this.coord.x, this.coord.y)
+          const pos = this._stage.BaseMap.coord2position(this.coord.x, this.coord.y)
           this.x = pos.x
           this.y = pos.y
         }
@@ -357,7 +357,7 @@ export class NpcItem extends Item {
 export class OverItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.fillStyle = '#FFF'
       context.font = 'bold 48px Helvetica'
       context.textAlign = 'center'
@@ -370,7 +370,7 @@ export class OverItem extends Item {
 export class FinalScoreItem extends Item {
   constructor(options: {}) {
     super(options)
-    this.draw = (context: any, globalObj: GlobalEnv, stage: Stage) => {
+    this.draw = (context: any, globalObj: GlobalEnv) => {
       context.fillStyle = '#FFF'
       context.font = '20px Helvetica'
       context.textAlign = 'center'

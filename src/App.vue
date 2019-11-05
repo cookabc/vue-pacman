@@ -12,7 +12,8 @@ import {
 } from 'vue-property-decorator'
 import {
   CANVAS_WIDTH,
-  CANVAS_HEIGHT
+  CANVAS_HEIGHT,
+  MAP_DATA
 } from './helpers/Constant'
 import {
   GlobalEnv
@@ -43,43 +44,6 @@ import {
   NpcItem
 } from './components/Item'
 
-const MAP_DATA = {
-  map: [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-  ],
-  wall_color: '#09f',
-  goods: ['1,3', '26,3', '1,23', '26,23']
-}
 
 @Component
 export default class PacMan extends Vue {
@@ -133,69 +97,69 @@ export default class PacMan extends Vue {
       x: this.WIDTH / 2,
       y: this.HEIGHT * .6
     })
-    // stage.bind(this.nextStage)
     this.stages.push(stage)
   }
   initMainStage() {
-    const config = MAP_DATA
-    const stage = new GameStage({
-      index: this.stages.length,
-      CONFIG: MAP_DATA
-    })
-    stage.BaseMap = stage.createMap('base', {
-      x: 60,
-      y: 10,
-      data: config.map,
-      cache: true
-    })
-    stage.BeanMap = stage.createMap('bean', {
-      x: 60,
-      y: 10,
-      data: config.map,
-      frames: 8
-    })
-    stage.createItem('score_level', {
-      x: 690,
-      y: 80
-    })
-    stage.createItem('status', {
-      x: 690,
-      y: 285,
-      frames: 25
-    })
-    stage.createItem('life', {
-      x: 705,
-      y: 510,
-      width: 30,
-      height: 30
-    })
-    for (let i = 0; i < 1; i++) {
-      const npcItem = stage.createItem('npc', {
+    MAP_DATA.forEach((config: any) => {
+      const stage = new GameStage({
+        index: this.stages.length,
+        CONFIG: config
+      })
+      stage.BaseMap = stage.createMap('base', {
+        x: 60,
+        y: 10,
+        data: config.map,
+        cache: true
+      })
+      stage.BeanMap = stage.createMap('bean', {
+        x: 60,
+        y: 10,
+        data: config.map,
+        frames: 8
+      })
+      stage.createItem('score_level', {
+        x: 690,
+        y: 80
+      })
+      stage.createItem('status', {
+        x: 690,
+        y: 285,
+        frames: 25
+      })
+      stage.createItem('life', {
+        x: 705,
+        y: 510,
+        width: 30,
+        height: 30
+      })
+      for (let i = 0; i < 1; i++) {
+        const npcItem = stage.createItem('npc', {
+          width: 30,
+          height: 30,
+          color: this.globalObj.COLOR[i],
+          location: stage.BaseMap,
+          coord: { x: 12 + i, y: 14 },
+          vector: { x: 12 + i, y: 14 },
+          orientation: 3,
+          type: 2,
+          speed: 1,
+          frames: 10,
+          timeout: Math.floor(Math.random() * 120)
+        })
+        stage.NPCs.push(npcItem)
+      }
+      stage.PLAYER = stage.createItem('player', {
         width: 30,
         height: 30,
-        color: this.globalObj.COLOR[i],
         location: stage.BaseMap,
-        coord: { x: 12 + i, y: 14 },
-        vector: { x: 12 + i, y: 14 },
-        orientation: 3,
-        type: 2,
-        speed: 1,
-        frames: 10,
-        timeout: Math.floor(Math.random() * 120)
+        coord: { x: 13.5, y: 23 },
+        orientation: 2,
+        type: 1,
+        speed: 2,
+        frames: 10
       })
-      stage.NPCs.push(npcItem)
-    }
-    stage.PLAYER = stage.createItem('player', {
-      width: 30,
-      height: 30,
-      location: stage.BaseMap,
-      coord: { x: 13.5, y: 23 },
-      orientation: 2,
-      type: 1,
-      speed: 2,
-      frames: 10
+      this.stages.push(stage)
     })
-    this.stages.push(stage)
   }
   initEndStage() {
     const stage = new SplashStage({
@@ -217,7 +181,7 @@ export default class PacMan extends Vue {
   }
   nextStage() {
     if (this.currentIndex < this.stages.length - 1) {
-      return this.setStage(++this.currentIndex)
+      this.setStage(++this.currentIndex)
     } else {
       throw new Error('unfound new stage.')
     }
@@ -241,14 +205,14 @@ export default class PacMan extends Vue {
         if (map.cache) {
           if (!map.imageData) {
             this.$context.save()
-            map.draw(this.$context, this.globalObj, stage)
+            map.draw(this.$context, this.globalObj)
             map.imageData = this.$context.getImageData(0, 0, this.WIDTH, this.HEIGHT)
             this.$context.restore()
           } else {
             this.$context.putImageData(map.imageData, 0, 0)
           }
         } else {
-          map.draw(this.$context, this.globalObj, stage)
+          map.draw(this.$context, this.globalObj)
         }
       })
       stage.items.forEach((item: Item) => {
@@ -262,9 +226,9 @@ export default class PacMan extends Vue {
           if (item.timeout) {
             item.timeout--
           }
-          item.update(this.globalObj, stage)
+          item.update(this.globalObj)
         }
-        item.draw(this.$context, this.globalObj, stage)
+        item.draw(this.$context, this.globalObj)
       })
     } else {
       this.gameOver()
