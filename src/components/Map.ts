@@ -1,4 +1,4 @@
-import { GlobalEnv, Vector } from '../helpers/Interfaces'
+import { GlobalEnv, Vector } from '../utils/Interfaces'
 import { Stage } from './Stage'
 
 export class Map {

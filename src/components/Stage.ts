@@ -1,4 +1,4 @@
-import { GlobalEnv } from '../helpers/Interfaces'
+import { GlobalEnv } from '../utils/Interfaces'
 import {
   Map,
   BaseMap,

@@ -13,14 +13,14 @@ import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   MAP_DATA
-} from './helpers/Constant'
+} from './utils/Constant'
 import {
   GlobalEnv
-} from './helpers/Interfaces'
+} from './utils/Interfaces'
 import {
   getCanvasElementById,
   getCanvasRenderingContext2D
-} from './helpers/Utils'
+} from './utils/Utils'
 import {
   Stage,
   SplashStage,

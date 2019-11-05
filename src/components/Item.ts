@@ -1,4 +1,4 @@
-import { GlobalEnv, Coord, Vector } from '../helpers/Interfaces'
+import { GlobalEnv, Coord, Vector } from '../utils/Interfaces'
 import { Stage } from './Stage'
 import { BaseMap } from './Map'
 
