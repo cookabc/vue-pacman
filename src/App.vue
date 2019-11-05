@@ -63,8 +63,8 @@ export default class PacMan extends Vue {
     COS: [1, 0, -1, 0],
     SIN: [0, 1, 0, -1],
     SCORE: 0,
-    LEVEL: 0,
-    LIFE: 2
+    LIFE: 5,
+    NPC_COUNT: 4
   }
   mounted() {
     this.initCanvas()
@@ -132,7 +132,7 @@ export default class PacMan extends Vue {
         width: 30,
         height: 30
       })
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < this.globalObj.NPC_COUNT; i++) {
         const npcItem = stage.createItem('npc', {
           width: 30,
           height: 30,

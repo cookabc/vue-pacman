@@ -3,8 +3,8 @@ export interface GlobalEnv {
   COS: number[],
   SIN: number[],
   SCORE: number,
-  LEVEL: number,
-  LIFE: number
+  LIFE: number,
+  NPC_COUNT: number
 }
 
 export interface Coord {

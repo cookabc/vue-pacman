@@ -52,6 +52,7 @@ export class Stage {
       item.y = position.y
     }
     item._stage = this
+    item._id = this.items.length
     this.items.push(item)
     return item
   }

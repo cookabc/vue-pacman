@@ -5,7 +5,7 @@ import { BaseMap } from './Map'
 export class Item {
   _params: any
   _id: number = 0
-  _stage: any = null
+  _stage!: Stage
   x: number = 0				           	                                    // 位置坐标:横坐标
   y: number = 0					                                              // 位置坐标:纵坐标
   width: number = 20				                                          // 宽
@@ -27,12 +27,10 @@ export class Item {
   control: any = {}				                                            // 控制缓存,到达定位点时处理
   constructor(params: {} = {}) {
     this._params = params
-    this._id = 0                                                      // 标志符
-    this._stage = null                                                // 与所属布景绑定
     Object.assign(this, this._params)
   }
-  update: (globalObj: GlobalEnv) => void = () => { }                // 更新参数信息
-  draw: (context: any, globalObj: GlobalEnv) => void = () => { }		// 绘制
+  update: (globalObj: GlobalEnv) => void = () => { }                  // 更新参数信息
+  draw: (context: any, globalObj: GlobalEnv) => void = () => { }		  // 绘制
 }
 
 export class LogoItem extends Item {
@@ -91,7 +89,7 @@ export class ScoreLevelItem extends Item {
       context.textAlign = 'left'
       context.textBaseline = 'top'
       context.fillStyle = '#FFF'
-      context.fillText((globalObj.LEVEL + 1).toString(), this.x + 12, this.y + 72)
+      context.fillText((this._stage.index).toString(), this.x + 12, this.y + 72)
     }
   }
 }

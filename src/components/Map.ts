@@ -3,8 +3,7 @@ import { Stage } from './Stage'
 
 export class Map {
   _params: any
-  _id: number = 0
-  _stage: any = null
+  _stage!: Stage
   x: number = 0				           	                                // 地图起点坐标
   y: number = 0					                                          // 地图起点坐标
   size: number = 20       				                                // 地图单元的宽度
@@ -18,11 +17,9 @@ export class Map {
   imageData!: ImageData | null
   constructor(params: {} = {}) {
     this._params = params
-    this._id = 0                                                  // 标志符
-    this._stage = null                                            // 与所属布景绑定
     Object.assign(this, this._params)
   }
-  update: () => void = () => { } 	                                              // 更新地图数据
+  update: () => void = () => { } 	                                // 更新地图数据
   draw: (context: any, globalObj: GlobalEnv) => void = () => { }  // 绘制
   get(px: number, py: number) {
     if (this.data[py] && typeof this.data[py][px] !== 'undefined') {
